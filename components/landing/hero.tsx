@@ -6,6 +6,17 @@ import StudioPreview from "./studio-preview";
 export default function Hero() {
   return (
     <section className="relative overflow-hidden py-24">
+
+      {/* Background Glow */}
+      <div className="absolute inset-0 -z-10">
+
+        <div className="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[150px]" />
+
+        <div className="absolute right-10 top-40 h-[350px] w-[350px] rounded-full bg-cyan-500/10 blur-[120px]" />
+
+        <div className="absolute left-20 bottom-0 h-[300px] w-[300px] rounded-full bg-violet-500/10 blur-[120px]" />
+
+      </div>
       <Container>
         <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
           <span className="mb-6 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-400">

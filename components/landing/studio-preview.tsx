@@ -26,24 +26,61 @@ export default function StudioPreview() {
                                 <h3 className="mb-4 text-sm font-semibold text-gray-400">
                                     Explorer
                                 </h3>
+                                <div className="space-y-1 text-sm">
 
-                                <ul className="space-y-3 text-sm text-gray-300">
-                                    <li>📁 app</li>
-                                    <li>📁 components</li>
-                                    <li>📁 assets</li>
-                                    <li>📁 public</li>
-                                    <li>📁 styles</li>
-                                    <li>📄 page.tsx</li>
-                                    <li>📄 layout.tsx</li>
-                                </ul>
+                                    <div className="cursor-pointer rounded-md px-2 py-1 text-yellow-400 hover:bg-white/10">
+                                        📂 src
+                                    </div>
+
+                                    <div className="ml-4 cursor-pointer rounded-md px-2 py-1 text-yellow-400 hover:bg-white/10">
+                                        📂 app
+                                    </div>
+
+                                    <div className="ml-8 cursor-pointer rounded-md px-2 py-1 text-gray-300 hover:bg-white/10">
+                                        📄 page.tsx
+                                    </div>
+
+                                    <div className="ml-8 cursor-pointer rounded-md px-2 py-1 text-gray-300 hover:bg-white/10">
+                                        📄 layout.tsx
+                                    </div>
+
+                                    <div className="ml-4 cursor-pointer rounded-md px-2 py-1 text-yellow-400 hover:bg-white/10">
+                                        📂 components
+                                    </div>
+
+                                    <div className="ml-8 cursor-pointer rounded-md px-2 py-1 text-gray-300 hover:bg-white/10">
+                                        📄 hero.tsx
+                                    </div>
+
+                                    <div className="ml-8 cursor-pointer rounded-md px-2 py-1 text-gray-300 hover:bg-white/10">
+                                        📄 navbar.tsx
+                                    </div>
+
+                                    <div className="ml-8 cursor-pointer rounded-md px-2 py-1 text-gray-300 hover:bg-white/10">
+                                        📄 studio-preview.tsx
+                                    </div>
+
+                                </div>
                             </>
                         </div>
 
                         {/* Editor */}
                         <div className="col-span-6 border-r border-white/10 bg-[#111827] p-4">
-                            <h3 className="mb-4 text-sm font-semibold text-gray-400">
-                                Hero.tsx
-                            </h3>
+                            <div className="mb-4 flex items-center gap-2 border-b border-white/10 pb-2 text-xs">
+
+                                <div className="rounded-t-md bg-[#1f2937] px-3 py-2 text-gray-400">
+                                    page.tsx
+                                </div>
+
+                                <div className="rounded-t-md bg-indigo-600 px-3 py-2 text-white">
+                                    hero.tsx
+                                </div>
+
+                                <div className="rounded-t-md bg-[#1f2937] px-3 py-2 text-gray-400">
+                                    navbar.tsx
+                                </div>
+
+                            </div>
 
                             <pre className="text-sm leading-7 text-green-400">
                                 {`export default function Hero() {
@@ -66,23 +103,77 @@ return (
 
                             <div className="rounded-xl bg-[#1f2937] p-5">
 
-                                <div className="mb-4 h-8 w-32 rounded bg-indigo-600"></div>
+                                <div className="flex flex-col items-center text-center">
 
-                                <div className="space-y-3">
-                                    <div className="h-4 w-full rounded bg-gray-700"></div>
-                                    <div className="h-4 w-4/5 rounded bg-gray-700"></div>
-                                    <div className="h-4 w-2/3 rounded bg-gray-700"></div>
+                                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-lg font-bold text-white">
+                                        F
+                                    </div>
+
+                                    <h4 className="text-lg font-bold text-white">
+                                        FrontCraft AI
+                                    </h4>
+
+                                    <p className="mt-2 text-xs text-gray-400">
+                                        Build Stunning Frontends with AI
+                                    </p>
+
+                                    <button className="mt-5 rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white transition hover:bg-indigo-500">
+                                        Get Started
+                                    </button>
+
+                                    <div className="mt-6 w-full rounded-lg bg-[#111827] p-3">
+
+                                        <div className="mb-2 h-2 w-full rounded bg-gray-700"></div>
+
+                                        <div className="mb-2 h-2 w-4/5 rounded bg-gray-700"></div>
+
+                                        <div className="mb-2 h-2 w-2/3 rounded bg-gray-700"></div>
+
+                                        <div className="mt-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 p-2 text-center text-xs text-indigo-300">
+                                            ✨ AI Generated
+                                        </div>
+
+                                    </div>
+
                                 </div>
-
-                                <button className="mt-6 rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white">
-                                    Get Started
-                                </button>
 
                             </div>
                         </div>
 
                     </div>
                 </div>
+
+                <div className="border-t border-white/10 bg-[#111827] px-6 py-4">
+
+                    <div className="flex items-center justify-between">
+
+                        <div>
+
+                            <p className="text-sm font-semibold text-white">
+                                ✨ AI Assistant
+                            </p>
+
+                            <p className="text-xs text-gray-400">
+                                Generating Hero Component...
+                            </p>
+
+                        </div>
+
+                        <span className="text-sm font-semibold text-indigo-400">
+                            98%
+                        </span>
+
+                    </div>
+
+                    <div className="mt-3 h-2 rounded-full bg-gray-700">
+
+                        <div className="h-2 w-[98%] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+
+                    </div>
+
+                </div>
+
+
             </Container>
         </section>
     );
