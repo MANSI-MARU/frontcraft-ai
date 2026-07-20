@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { navigation } from "@/constants/navigation";
 import Container from "@/components/common/container";
@@ -10,14 +11,21 @@ export default function Navbar() {
             <Container>
                 <nav className="flex h-20 items-center justify-between">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-lg font-bold text-white">
-                            F
-                        </div>
+                    <Link href="/" className="flex items-center gap-3">
 
-                        <span className="text-xl font-bold">
+                        <Image
+                            src="/logo.png"
+                            alt="FrontCraft AI"
+                            width={42}
+                            height={42}
+                            priority
+                            className="rounded-xl"
+                        />
+
+                        <span className="text-xl font-bold tracking-tight">
                             FrontCraft AI
                         </span>
+
                     </Link>
 
                     {/* Navigation */}
