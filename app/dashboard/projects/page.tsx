@@ -1,10 +1,38 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import CreateProjectModal from "@/components/projects/CreateProjectModal";
 import { FolderPlus } from "lucide-react";
+import { getProjects } from "@/services/project";
+import { useAuth } from "@/contexts/AuthContext";
+import ProjectGrid from "@/components/projects/ProjectGrid";
+import EmptyProjects from "@/components/projects/EmptyProjects";
 
 export default function ProjectsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const { user } = useAuth();
+
+    const [projects, setProjects] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        const fetchProjects = async () => {
+            if (!user) return;
+
+            try {
+                const data = await getProjects(user.uid);
+                console.log("Projects from Firestore:", data);
+                console.log("Projects:", data);
+                setProjects(data);
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProjects();
+    }, [user]);
     return (
         <div className="p-8">
             <div className="flex items-center justify-between">
@@ -26,33 +54,17 @@ export default function ProjectsPage() {
                     New Project
                 </button>
             </div>
+            {projects.length === 0 && <EmptyProjects />}
 
-            <div className="mt-10 rounded-xl border border-dashed border-gray-700 bg-[#111827] p-16 text-center">
-                <FolderPlus
-                    size={60}
-                    className="mx-auto text-purple-500"
-                />
+            {projects.length > 0 && (
+                <ProjectGrid projects={projects} />
+            )}
 
-                <h2 className="mt-5 text-2xl font-semibold text-white">
-                    No Projects Yet
-                </h2>
-
-                <p className="mt-3 text-gray-400">
-                    Create your first project to start building with
-                    FrontCraft AI.
-                </p>
-
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="mt-8 rounded-lg bg-purple-600 px-6 py-3 font-medium text-white transition hover:bg-purple-700"
-                >
-                    Create Project
-                </button>
-                <CreateProjectModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                />
-            </div>
+            <CreateProjectModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
         </div>
+
     );
 }

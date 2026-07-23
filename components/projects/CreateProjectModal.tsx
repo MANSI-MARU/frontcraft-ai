@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createProject } from "@/services/project";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type CreateProjectModalProps = {
     isOpen: boolean;
@@ -23,7 +24,7 @@ export default function CreateProjectModal({
         if (!user) return;
 
         if (!projectName.trim()) {
-            alert("Please enter a project name.");
+            toast.error("Please enter a project name.");
             return;
         }
 
@@ -41,10 +42,10 @@ export default function CreateProjectModal({
 
             onClose();
 
-            alert("Project created successfully!");
+            toast.success("Project created successfully!");
         } catch (error) {
             console.error(error);
-            alert("Failed to create project.");
+            toast.error("Failed to create project.");
         } finally {
             setLoading(false);
         }
