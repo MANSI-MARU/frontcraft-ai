@@ -1,3 +1,5 @@
+"use client";
+
 import {
     Monitor,
     Tablet,
@@ -7,6 +9,7 @@ import {
     CheckCircle,
     Folder,
 } from "lucide-react";
+import { useAIStore } from "@/store/aiStore";
 
 interface WorkspaceHeaderProps {
     project: {
@@ -19,11 +22,12 @@ interface WorkspaceHeaderProps {
 export default function WorkspaceHeader({
     project,
 }: WorkspaceHeaderProps) {
+    const { device, setDevice } = useAIStore();
+
     return (
         <div className="rounded-2xl border border-gray-800 bg-[#111827] p-5">
             {/* Top Row */}
             <div className="flex items-center justify-between">
-
                 {/* Project Info */}
                 <div className="flex items-center gap-3">
                     <div className="rounded-lg bg-purple-600/10 p-2">
@@ -53,27 +57,41 @@ export default function WorkspaceHeader({
 
             {/* Bottom Row */}
             <div className="mt-5 flex items-center justify-between border-t border-gray-800 pt-5">
-
                 {/* Device Switcher */}
                 <div className="flex items-center gap-2">
-
-                    <button className="rounded-lg bg-purple-600 px-4 py-2 text-white">
+                    <button
+                        onClick={() => setDevice("desktop")}
+                        className={`rounded-lg p-2 transition ${device === "desktop"
+                                ? "bg-purple-600 text-white"
+                                : "bg-[#1E293B] text-gray-400 hover:bg-gray-700"
+                            }`}
+                    >
                         <Monitor className="h-5 w-5" />
                     </button>
 
-                    <button className="rounded-lg bg-[#1E293B] p-2 text-gray-400 hover:bg-gray-700">
+                    <button
+                        onClick={() => setDevice("tablet")}
+                        className={`rounded-lg p-2 transition ${device === "tablet"
+                                ? "bg-purple-600 text-white"
+                                : "bg-[#1E293B] text-gray-400 hover:bg-gray-700"
+                            }`}
+                    >
                         <Tablet className="h-5 w-5" />
                     </button>
 
-                    <button className="rounded-lg bg-[#1E293B] p-2 text-gray-400 hover:bg-gray-700">
+                    <button
+                        onClick={() => setDevice("mobile")}
+                        className={`rounded-lg p-2 transition ${device === "mobile"
+                                ? "bg-purple-600 text-white"
+                                : "bg-[#1E293B] text-gray-400 hover:bg-gray-700"
+                            }`}
+                    >
                         <Smartphone className="h-5 w-5" />
                     </button>
-
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-3">
-
                     <button className="flex items-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-gray-300 hover:bg-gray-800">
                         <Download className="h-4 w-4" />
                         Export
@@ -83,9 +101,7 @@ export default function WorkspaceHeader({
                         <Rocket className="h-4 w-4" />
                         Deploy
                     </button>
-
                 </div>
-
             </div>
         </div>
     );

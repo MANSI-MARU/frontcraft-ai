@@ -3,11 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getProjectById } from "@/services/project";
-import PromptPanel from "@/components/studio/PromptPanel";
-import PreviewPanel from "@/components/studio/PreviewPanel";
-import PropertiesPanel from "@/components/studio/PropertiesPanel";
-import BottomPanel from "@/components/studio/BottomPanel";
 import WorkspaceHeader from "@/components/studio/WorkspaceHeader";
+import StudioLayout from "@/components/studio/StudioLayout";
 
 export default function ProjectPage() {
     const params = useParams();
@@ -51,24 +48,8 @@ export default function ProjectPage() {
 
             <WorkspaceHeader project={project} />
 
-            <div className="grid flex-1 grid-cols-12 gap-4">
 
-                <div className="col-span-3">
-                    <PromptPanel />
-                </div>
-
-                <div className="col-span-6">
-                    <PreviewPanel />
-                </div>
-
-                <div className="col-span-3">
-                    <PropertiesPanel />
-                </div>
-
-            </div>
-
-            <BottomPanel />
-
+            <StudioLayout />
         </div>
     );
 }
