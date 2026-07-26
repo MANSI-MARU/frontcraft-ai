@@ -1,6 +1,10 @@
 "use client";
 
-import { Sandpack } from "@codesandbox/sandpack-react";
+import {
+    SandpackProvider,
+    SandpackLayout,
+    SandpackPreview,
+} from "@codesandbox/sandpack-react";
 import { useAIStore } from "@/store/aiStore";
 import { frontCraftRuntime } from "@/lib/runtime/runtime";
 
@@ -18,11 +22,19 @@ export default function PreviewPanel() {
     }[device];
 
     // Prepare Sandpack files
+    console.log("generatedCode:", generatedCode);
+    console.log("generatedFiles:", generatedFiles);
+    console.log("App.tsx:", generatedFiles["App.tsx"]);
+    const generatedProjectFiles = Object.fromEntries(
+        Object.entries(generatedFiles).map(([path, code]) => [
+            `/${path}`,
+            code,
+        ])
+    );
+
     const sandpackFiles = {
         ...frontCraftRuntime,
-
-        "/App.tsx":
-            generatedFiles["App.tsx"] || generatedCode,
+        ...generatedProjectFiles,
     };
 
     return (
@@ -44,7 +56,7 @@ export default function PreviewPanel() {
                 >
                     {(generatedCode ||
                         Object.keys(generatedFiles).length > 0) ? (
-                        <Sandpack
+                        <SandpackProvider
                             template="react-ts"
                             files={sandpackFiles}
                             customSetup={{
@@ -53,14 +65,19 @@ export default function PreviewPanel() {
                                     "react-dom": "^19.0.0",
                                 },
                             }}
-                            options={{
-                                showNavigator: false,
-                                showTabs: false,
-                                showLineNumbers: true,
-                                showConsole: true,
-                                editorHeight: 500,
-                            }}
-                        />
+                        >
+                            <SandpackLayout>
+                                <div className="flex h-[500px] items-center justify-center overflow-hidden rounded-lg bg-white"></div>
+                                <SandpackPreview
+                                    showOpenInCodeSandbox={false}
+                                    showRefreshButton={false}
+                                    style={{
+                                        height: "500px",
+                                        border: "none",
+                                    }}
+                                />
+                            </SandpackLayout>
+                        </SandpackProvider>
                     ) : (
                         <div className="flex h-full items-center justify-center bg-[#0F172A] text-gray-400">
                             Generate a UI to see the live preview.

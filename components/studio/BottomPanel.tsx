@@ -3,6 +3,7 @@ import { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { useAIStore } from "@/store/aiStore";
 import { toast } from "sonner";
+import EditorTabs from "./EditorTabs";
 
 export default function BottomPanel() {
     const {
@@ -208,41 +209,51 @@ export default function BottomPanel() {
             <div className="mt-4 overflow-hidden rounded-lg border border-gray-800">
 
                 {activeTab === "code" && (
-                    currentCode ? (
-                        <Editor
-                            height="500px"
-                            defaultLanguage="typescript"
-                            theme="vs-dark"
-                            value={currentCode}
-                            onChange={handleEditorChange}
-                            beforeMount={(monaco) => {
-                                monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-                                    noSemanticValidation: true,
-                                    noSyntaxValidation: false,
-                                });
-                            }}
-                            options={{
-                                minimap: {
-                                    enabled: false,
-                                },
-                                fontSize: 14,
-                                automaticLayout: true,
-                                wordWrap: "on",
-                                scrollBeyondLastLine: false,
-                                formatOnPaste: true,
-                                formatOnType: true,
-                                tabSize: 2,
-                                renderValidationDecorations: "off",
-                                glyphMargin: false,
-                                folding: true,
-                            }}
-                        />
-                    ) : (
-                        <div className="flex h-[500px] items-center justify-center bg-[#0F172A] text-gray-500">
-                            No code generated yet.
-                        </div>
-                    )
+                    <>
+                        <EditorTabs />
+
+                        {currentCode ? (
+                            <Editor
+                                height="500px"
+                                defaultLanguage="typescript"
+                                theme="vs-dark"
+                                value={currentCode}
+                                onChange={handleEditorChange}
+                                beforeMount={(monaco) => {
+                                    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+                                        noSemanticValidation: true,
+                                        noSyntaxValidation: false,
+                                    });
+                                }}
+                                options={{
+                                    minimap: {
+                                        enabled: false,
+                                    },
+                                    fontSize: 14,
+                                    automaticLayout: true,
+                                    wordWrap: "on",
+                                    scrollBeyondLastLine: false,
+                                    formatOnPaste: true,
+                                    formatOnType: true,
+                                    tabSize: 2,
+                                    renderValidationDecorations: "off",
+                                    glyphMargin: false,
+                                    folding: true,
+                                }}
+                            />
+                        ) : (
+                            <div className="flex h-[500px] items-center justify-center bg-[#0F172A] text-gray-500">
+                                No code generated yet.
+                            </div>
+                        )}
+                    </>
                 )}
+                : (
+                <div className="flex h-[500px] items-center justify-center bg-[#0F172A] text-gray-500">
+                    No code generated yet.
+                </div>
+                )
+
 
                 {activeTab === "chat" && (
                     <div className="flex h-[500px] flex-col bg-[#0F172A]">

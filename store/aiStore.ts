@@ -7,14 +7,12 @@ export interface GeneratedFiles {
 interface AIStore {
     prompt: string;
 
-    // Current single-file support
     generatedCode: string;
 
-    // New multi-file support
     generatedFiles: GeneratedFiles;
 
-    // Currently selected file
     activeFile: string;
+    openTabs: string[];
     isModified: boolean;
 
     loading: boolean;
@@ -26,11 +24,21 @@ interface AIStore {
     setGeneratedCode: (code: string) => void;
     setGeneratedFiles: (files: GeneratedFiles) => void;
     setActiveFile: (file: string) => void;
+    setOpenTabs: (tabs: string[]) => void;
     setIsModified: (modified: boolean) => void;
     setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
     setDevice: (
         device: "desktop" | "tablet" | "mobile"
+    ) => void;
+
+    createFile: (path: string) => void;
+    createFolder: (path: string) => void;
+    renameFile: (oldPath: string, newPath: string) => void;
+    deleteFile: (path: string) => void;
+    updateFileContent: (
+        path: string,
+        content: string
     ) => void;
 }
 
@@ -41,8 +49,8 @@ export const useAIStore = create<AIStore>((set) => ({
 
     generatedFiles: {},
 
-    // Default selected file
     activeFile: "App.tsx",
+    openTabs: ["App.tsx"],
     isModified: false,
 
     loading: false,
@@ -69,6 +77,12 @@ export const useAIStore = create<AIStore>((set) => ({
         set({
             activeFile,
         }),
+
+    setOpenTabs: (openTabs) =>
+        set({
+            openTabs,
+        }),
+
     setIsModified: (isModified) =>
         set({
             isModified,
@@ -88,4 +102,32 @@ export const useAIStore = create<AIStore>((set) => ({
         set({
             device,
         }),
+
+    createFile: (path) =>
+        set((state) => {
+            if (state.generatedFiles[path]) {
+                return state;
+            }
+
+            return {
+                generatedFiles: {
+                    ...state.generatedFiles,
+                    [path]: "",
+                },
+
+                activeFile: path,
+
+                openTabs: state.openTabs.includes(path)
+                    ? state.openTabs
+                    : [...state.openTabs, path],
+            };
+        }),
+
+    createFolder: () => { },
+
+    renameFile: () => { },
+
+    deleteFile: () => { },
+
+    updateFileContent: () => { },
 }));

@@ -12,6 +12,7 @@ export default function PromptPanel() {
         setLoading,
         error,
         setError,
+        setActiveFile,
     } = useAIStore();
 
     const handleGenerate = async () => {
@@ -32,6 +33,7 @@ export default function PromptPanel() {
             });
 
             const data = await response.json();
+            console.log("API Response:", data);
 
             if (!response.ok) {
                 throw new Error(data.message || "Failed to generate UI");
@@ -39,20 +41,17 @@ export default function PromptPanel() {
 
             const cleanedCode = data.result
                 .replace(/```json/g, "")
-                .replace(/```tsx/g, "")
-                .replace(/```ts/g, "")
-                .replace(/```jsx/g, "")
-                .replace(/```js/g, "")
                 .replace(/```/g, "")
                 .trim();
 
-            // Current single-file flow
-            setGeneratedCode(cleanedCode);
+            const parsed = JSON.parse(cleanedCode);
 
-            // Prepare for future multi-file support
-            setGeneratedFiles({
-                "App.tsx": cleanedCode,
-            });
+            setGeneratedFiles(parsed.files);
+
+            setGeneratedCode(parsed.files["App.tsx"] || "");
+
+            setActiveFile("App.tsx");
+
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);

@@ -1,5 +1,5 @@
 export const frontCraftRuntime = {
-    "/App.tsx": `
+  "/App.tsx": `
 import React from "react";
 
 export default function App() {
@@ -12,7 +12,7 @@ export default function App() {
 }
 `,
 
-    "/index.tsx": `
+  "/index.tsx": `
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
@@ -22,7 +22,7 @@ const root = createRoot(document.getElementById("root")!);
 root.render(<App />);
 `,
 
-    "/styles.css": `
+  "/styles.css": `
 *{
   margin:0;
   padding:0;
@@ -35,10 +35,30 @@ body{
   color:#fff;
 }
 
+/* Input */
+
+.input{
+  width:100%;
+  padding:14px 18px;
+  border:1px solid #334155;
+  border-radius:12px;
+  background:#0f172a;
+  color:#ffffff;
+  outline:none;
+  transition:0.2s ease;
+}
+
+.input::placeholder{
+  color:#94a3b8;
+}
+
+.input:focus{
+  border-color:#7c3aed;
+}
+    
 /* Layout */
 
 .container{
-  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
@@ -150,7 +170,7 @@ input:focus{
 }
 `,
 
-    "/package.json": `
+  "/package.json": `
 {
   "name":"frontcraft-runtime",
   "main":"/index.tsx",
