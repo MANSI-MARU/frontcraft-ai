@@ -13,6 +13,7 @@ export default function PreviewPanel() {
         generatedCode,
         generatedFiles,
         device,
+        projectVersion,
     } = useAIStore();
 
     const previewWidth = {
@@ -57,6 +58,7 @@ export default function PreviewPanel() {
                     {(generatedCode ||
                         Object.keys(generatedFiles).length > 0) ? (
                         <SandpackProvider
+                            key={JSON.stringify(Object.keys(generatedFiles))}
                             template="react-ts"
                             files={sandpackFiles}
                             customSetup={{

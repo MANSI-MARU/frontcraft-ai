@@ -13,6 +13,8 @@ export default function PromptPanel() {
         error,
         setError,
         setActiveFile,
+        setOpenTabs,
+        addHistory,
     } = useAIStore();
 
     const handleGenerate = async () => {
@@ -45,12 +47,22 @@ export default function PromptPanel() {
                 .trim();
 
             const parsed = JSON.parse(cleanedCode);
+            console.log("Parsed:", parsed);
+            console.log("Parsed Files:", parsed.files);
 
             setGeneratedFiles(parsed.files);
 
             setGeneratedCode(parsed.files["App.tsx"] || "");
 
             setActiveFile("App.tsx");
+
+            setOpenTabs(["App.tsx"]);
+
+            addHistory(
+                prompt,
+                parsed.files
+            );
+
 
         } catch (err) {
             if (err instanceof Error) {

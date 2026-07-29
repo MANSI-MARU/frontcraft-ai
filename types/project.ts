@@ -1,10 +1,12 @@
-export interface Project {
+export type NodeType = "file" | "folder";
+
+export interface ExplorerNode {
     id: string;
     name: string;
-    description?: string;
-    template: string;
-    userId: string;
-    createdAt: Date;
-    updatedAt: Date;
-    isStarred: boolean;
+    path: string;
+    type: NodeType;
+    children?: ExplorerNode[];
+
+    // 👇 New
+    isEditing?: boolean;
 }

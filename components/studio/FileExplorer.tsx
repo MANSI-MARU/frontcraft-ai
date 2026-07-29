@@ -1,20 +1,17 @@
 "use client";
 
 import { FileText } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAIStore } from "@/store/aiStore";
 import FileTree from "./FileTree";
-
-interface FileNode {
-    name: string;
-    path: string;
-    children?: FileNode[];
-}
-function buildFileTree(files: string[]): FileNode[] {
-    const root: FileNode[] = [];
+import { ExplorerNode } from "@/types/project";
+function buildFileTree(files: string[]): ExplorerNode[] {
+    const root: ExplorerNode[] = [];
 
     files.forEach((filePath) => {
-        const parts = filePath.split("/");
+        const parts = filePath
+            .split("/")
+            .filter(Boolean);
 
         let current = root;
 
@@ -28,18 +25,26 @@ function buildFileTree(files: string[]): FileNode[] {
             );
 
             if (!existing) {
+                const isFolder =
+                    filePath.endsWith("/") &&
+                    index === parts.length - 1;
+
                 existing = {
+                    id: fullPath,
                     name: part,
                     path: fullPath,
+                    type:
+                        isFolder || index < parts.length - 1
+                            ? "folder"
+                            : "file",
                     children:
-                        index === parts.length - 1
-                            ? undefined
-                            : [],
+                        isFolder || index < parts.length - 1
+                            ? []
+                            : undefined,
                 };
 
                 current.push(existing);
             }
-
             if (existing.children) {
                 current = existing.children;
             }
@@ -52,12 +57,19 @@ export default function FileExplorer() {
     const {
         generatedFiles,
         createFile,
+        createFolder,
     } = useAIStore();
     const [showNewFile, setShowNewFile] = useState(false);
     const [newFileName, setNewFileName] = useState("");
+    const [showNewFolder, setShowNewFolder] = useState(false);
+    const [newFolderName, setNewFolderName] = useState("");
     const files = Object.keys(generatedFiles).sort();
+    console.log("Generated Files:", generatedFiles);
+    console.log("Files:", files);
 
-    const tree = buildFileTree(files);
+    const tree = useMemo(() => {
+        return buildFileTree(files);
+    }, [files]);
 
     console.log(tree);
 
@@ -78,7 +90,10 @@ export default function FileExplorer() {
                         + File
                     </button>
 
-                    <button className="rounded bg-gray-700 px-2 py-1 text-xs text-white transition hover:bg-gray-600">
+                    <button
+                        onClick={() => setShowNewFolder(true)}
+                        className="rounded bg-gray-700 px-2 py-1 text-xs text-white transition hover:bg-gray-600"
+                    >
                         + Folder
                     </button>
                 </div>
@@ -93,17 +108,48 @@ export default function FileExplorer() {
                         onChange={(e) => setNewFileName(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
+                                console.log("Creating:", newFileName);
+
                                 if (!newFileName.trim()) return;
 
+                                console.log("Creating file:", newFileName);
+
                                 createFile(newFileName.trim());
+
+                                console.log("After create");
 
                                 setNewFileName("");
                                 setShowNewFile(false);
                             }
+                        }
+                        }
+                        className="w-full rounded border border-gray-600 bg-[#1f2937] px-3 py-2 text-sm text-white outline-none focus:border-purple-500"
+                    />
+                </div>
+            )}
+            {showNewFolder && (
+                <div className="border-b border-gray-700 p-3">
+                    <input
+                        autoFocus
+                        type="text"
+                        placeholder="components"
+                        value={newFolderName}
+                        onChange={(e) =>
+                            setNewFolderName(e.target.value)
+                        }
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                if (!newFolderName.trim()) return;
+
+                                createFolder(newFolderName.trim());
+
+                                setNewFolderName("");
+                                setShowNewFolder(false);
+                            }
 
                             if (e.key === "Escape") {
-                                setShowNewFile(false);
-                                setNewFileName("");
+                                setShowNewFolder(false);
+                                setNewFolderName("");
                             }
                         }}
                         className="w-full rounded border border-gray-600 bg-[#1f2937] px-3 py-2 text-sm text-white outline-none focus:border-purple-500"

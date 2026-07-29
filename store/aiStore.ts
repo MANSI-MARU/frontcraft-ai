@@ -1,4 +1,10 @@
 import { create } from "zustand";
+export interface HistoryItem {
+    id: string;
+    title: string;
+    timestamp: string;
+    files: Record<string, string>;
+}
 
 export interface GeneratedFiles {
     [filePath: string]: string;
@@ -19,8 +25,11 @@ interface AIStore {
     error: string | null;
 
     device: "desktop" | "tablet" | "mobile";
+    history: HistoryItem[];
+    projectVersion: number;
 
     setPrompt: (prompt: string) => void;
+
     setGeneratedCode: (code: string) => void;
     setGeneratedFiles: (files: GeneratedFiles) => void;
     setActiveFile: (file: string) => void;
@@ -31,6 +40,9 @@ interface AIStore {
     setDevice: (
         device: "desktop" | "tablet" | "mobile"
     ) => void;
+    addHistory: (title: string, files: GeneratedFiles) => void;
+    restoreHistory: (id: string) => void;
+    incrementProjectVersion: () => void;
 
     createFile: (path: string) => void;
     createFolder: (path: string) => void;
@@ -57,6 +69,9 @@ export const useAIStore = create<AIStore>((set) => ({
     error: null,
 
     device: "desktop",
+
+    history: [],
+    projectVersion: 0,
 
     setPrompt: (prompt) =>
         set({
@@ -102,6 +117,55 @@ export const useAIStore = create<AIStore>((set) => ({
         set({
             device,
         }),
+    addHistory: (title, files) =>
+        set((state) => ({
+            history: [
+                {
+                    id: crypto.randomUUID(),
+                    title,
+                    timestamp: new Date().toLocaleTimeString(),
+                    files: structuredClone(files),
+                },
+                ...state.history,
+            ],
+        })),
+    restoreHistory: (id) =>
+        set((state) => {
+            console.log("========== RESTORE ==========");
+            console.log("restoreHistory called");
+            console.log("ID:", id);
+
+            const version = state.history.find(
+                (item) => item.id === id
+            );
+
+            console.log("Version:", version);
+            console.log("Current Files:", state.generatedFiles);
+            console.log("History Files:", version?.files);
+
+            if (!version) {
+                return state;
+            }
+            console.log(
+                "Button.tsx:",
+                version.files["components/Button.tsx"]
+            );
+            return {
+                generatedFiles: structuredClone(version.files),
+                activeFile: "App.tsx",
+                openTabs: ["App.tsx"],
+                generatedCode:
+                    version.files["App.tsx"] ?? "",
+                isModified: false,
+                projectVersion: state.projectVersion + 1,
+            };
+        }),
+
+    incrementProjectVersion: () =>
+        set((state) => ({
+            projectVersion: state.projectVersion + 1,
+        })),
+
 
     createFile: (path) =>
         set((state) => {
@@ -123,11 +187,81 @@ export const useAIStore = create<AIStore>((set) => ({
             };
         }),
 
-    createFolder: () => { },
+    createFolder: (path) =>
+        set((state) => {
+            // Always store folders with a trailing "/"
+            const folderPath = path.endsWith("/")
+                ? path
+                : `${path}/`;
 
-    renameFile: () => { },
+            // Don't create if it already exists
+            if (state.generatedFiles[folderPath]) {
+                return state;
+            }
 
-    deleteFile: () => { },
+            return {
+                generatedFiles: {
+                    ...state.generatedFiles,
+                    [folderPath]: "",
+                },
+            };
+        }),
+
+    renameFile: (oldPath, newPath) =>
+        set((state) => {
+            if (!state.generatedFiles[oldPath]) {
+                return state;
+            }
+
+            const updatedFiles = {
+                ...state.generatedFiles,
+            };
+
+            updatedFiles[newPath] =
+                updatedFiles[oldPath];
+
+            delete updatedFiles[oldPath];
+
+            const updatedTabs =
+                state.openTabs.map((tab) =>
+                    tab === oldPath ? newPath : tab
+                );
+
+            return {
+                generatedFiles: updatedFiles,
+                activeFile:
+                    state.activeFile === oldPath
+                        ? newPath
+                        : state.activeFile,
+                openTabs: updatedTabs,
+            };
+        }),
+
+    deleteFile: (path) =>
+        set((state) => {
+            const updatedFiles = {
+                ...state.generatedFiles,
+            };
+
+            delete updatedFiles[path];
+
+            const updatedTabs = state.openTabs.filter(
+                (tab) => tab !== path
+            );
+
+            const newActiveFile =
+                state.activeFile === path
+                    ? updatedTabs.length > 0
+                        ? updatedTabs[0]
+                        : ""
+                    : state.activeFile;
+
+            return {
+                generatedFiles: updatedFiles,
+                openTabs: updatedTabs,
+                activeFile: newActiveFile,
+            };
+        }),
 
     updateFileContent: () => { },
 }));

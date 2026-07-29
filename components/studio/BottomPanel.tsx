@@ -2,24 +2,40 @@
 import { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { useAIStore } from "@/store/aiStore";
+import { frontCraftRuntime } from "@/lib/runtime/runtime";
 import { toast } from "sonner";
 import EditorTabs from "./EditorTabs";
+
+const isFileMap = (value: any): value is Record<string, string> => {
+    return (
+        value &&
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        Object.keys(value).length > 0 &&
+        Object.keys(value).every(
+            (key) => typeof value[key] === "string" && key.includes(".")
+        )
+    );
+};
 
 export default function BottomPanel() {
     const {
         generatedCode,
         generatedFiles,
         activeFile,
+        history,
+        restoreHistory,
         isModified,
         loading,
         setGeneratedCode,
         setGeneratedFiles,
         setIsModified,
         setLoading,
+        addHistory,
     } = useAIStore();
 
     const currentCode =
-        generatedFiles[activeFile] || generatedCode;
+        generatedFiles[activeFile] ?? "";
     const [activeTab, setActiveTab] = useState<
         "code" | "chat" | "console" | "history"
     >("code");
@@ -79,44 +95,73 @@ export default function BottomPanel() {
         try {
             setLoading(true);
 
+            console.log("========== AI CHAT ==========");
+            console.log("Active File:", activeFile);
+            console.log("Generated Files:", generatedFiles);
+            console.log("=============================");
+            const filesToSend = {
+                ...generatedFiles,
+                "styles.css": generatedFiles["styles.css"] ?? frontCraftRuntime["/styles.css"],
+            };
+
             const response = await fetch("/api/modify-ui", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    currentCode,
+                    files: filesToSend,
+                    activeFile,
                     instruction: chatMessage,
                 }),
             });
 
-            const data = await response.json();
-
-            console.log("===== AI RESPONSE =====");
-            console.log(data);
-            console.log("======================");
+            const contentType = response.headers.get("content-type") || "";
+            const data = contentType.includes("application/json")
+                ? await response.json()
+                : { error: await response.text() };
 
             if (!response.ok) {
-                throw new Error(data.error || "Failed to modify UI");
+                console.error("modify-ui failed", response.status, data);
+                throw new Error(
+                    data.error ||
+                    `Failed to modify UI${data.rawResponse ? ": " + data.rawResponse : ""}`
+                );
             }
 
-            // Update the editor
-            setGeneratedCode(data.code);
+            const files = isFileMap(data.files)
+                ? data.files
+                : isFileMap(data)
+                    ? data
+                    : null;
 
-            setGeneratedFiles({
-                ...generatedFiles,
-                [activeFile]: data.code,
-            });
+            if (!files) {
+                console.error("modify-ui response missing files", data);
+                throw new Error(
+                    data.error ||
+                    `AI did not return files.${data.rawResponse ? " Raw: " + data.rawResponse : ""}`
+                );
+            }
+
+            setGeneratedFiles(files);
+
+            setGeneratedCode(files[activeFile] ?? "");
 
             setIsModified(true);
 
             toast.success("UI updated successfully!");
+            addHistory(chatMessage, data.files);
 
             setChatMessage("");
         } catch (error) {
             console.error(error);
 
-            toast.error("Failed to update UI.");
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Failed to update UI.";
+
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -248,12 +293,6 @@ export default function BottomPanel() {
                         )}
                     </>
                 )}
-                : (
-                <div className="flex h-[500px] items-center justify-center bg-[#0F172A] text-gray-500">
-                    No code generated yet.
-                </div>
-                )
-
 
                 {activeTab === "chat" && (
                     <div className="flex h-[500px] flex-col bg-[#0F172A]">
@@ -284,6 +323,7 @@ export default function BottomPanel() {
                                     className="rounded-lg bg-purple-600 px-5 py-3 font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {loading ? "Thinking..." : "Send"}
+
                                 </button>
                             </div>
                         </div>
@@ -298,8 +338,47 @@ export default function BottomPanel() {
                 )}
 
                 {activeTab === "history" && (
-                    <div className="flex h-[500px] items-center justify-center bg-[#0F172A] text-gray-500">
-                        Version history coming soon...
+                    <div className="h-[500px] overflow-y-auto bg-[#0F172A] p-4">
+
+                        {history.length === 0 ? (
+                            <div className="flex h-full items-center justify-center text-gray-500">
+                                No history available.
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {history.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="cursor-pointer rounded-lg border border-gray-700 bg-[#111827] p-4 hover:border-purple-500"
+                                    >
+                                        <h3 className="font-medium text-white">
+                                            {item.title}
+                                        </h3>
+
+                                        <p className="mt-1 text-xs text-gray-400">
+                                            {item.timestamp}
+                                        </p>
+                                        <p className="mt-2 text-xs text-green-400">
+                                            Files: {Object.keys(item.files).length}
+                                        </p>
+
+                                        <p className="text-xs text-blue-400">
+                                            App.tsx Length: {item.files["App.tsx"]?.length}
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                console.log("Button clicked:", item.id);
+                                                restoreHistory(item.id);
+                                            }}
+                                            className="mt-3 rounded-md bg-purple-600 px-3 py-2 text-sm text-white hover:bg-purple-700"
+                                        >
+                                            Restore Version
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                     </div>
                 )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAIStore } from "@/store/aiStore";
 import {
     ChevronRight,
@@ -9,15 +9,10 @@ import {
     FolderOpen,
     FileText,
 } from "lucide-react";
-
-interface FileNode {
-    name: string;
-    path: string;
-    children?: FileNode[];
-}
+import { ExplorerNode } from "@/types/project";
 
 interface FileTreeProps {
-    nodes: FileNode[];
+    nodes: ExplorerNode[];
     level?: number;
 }
 
@@ -42,18 +37,49 @@ function TreeNode({
     node,
     level,
 }: {
-    node: FileNode;
+    node: ExplorerNode;
     level: number;
 }) {
     const [open, setOpen] = useState(true);
+
     const {
         activeFile,
         openTabs,
         setActiveFile,
         setOpenTabs,
+        renameFile,
+        deleteFile
     } = useAIStore();
+    const [isEditing, setIsEditing] = useState(false);
+    const [fileName, setFileName] = useState(node.name);
+    const [showMenu, setShowMenu] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({
+        x: 0,
+        y: 0,
+    });
+    const menuRef = useRef<HTMLDivElement>(null);
 
-    const isFolder = !!node.children;
+    const isFolder = node.type === "folder";
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node)
+            ) {
+                setShowMenu(false);
+            }
+        }
+
+        document.addEventListener("click", handleClickOutside);
+
+        return () => {
+            document.removeEventListener(
+                "click",
+                handleClickOutside
+            );
+        };
+    }, []);
+    console.log(node.name, isEditing);
 
     return (
         <div>
@@ -83,7 +109,22 @@ ${activeFile === node.path
                         ]);
                     }
                 }}
+                onDoubleClick={() => {
+                    console.log("Double Click");
+                    setIsEditing(true);
+                }}
+                onContextMenu={(e) => {
+                    e.preventDefault();
+
+                    setMenuPosition({
+                        x: e.clientX,
+                        y: e.clientY,
+                    });
+
+                    setShowMenu(true);
+                }}
             >
+
                 {isFolder ? (
                     open ? (
                         <ChevronDown
@@ -123,15 +164,43 @@ ${activeFile === node.path
                     />
                 )}
 
-                <span
-                    className={
-                        activeFile === node.path
-                            ? "text-white font-medium"
-                            : "text-gray-300"
-                    }
-                >
-                    {node.name}
-                </span>
+                {isEditing ? (
+                    <input
+                        autoFocus
+                        value={fileName}
+                        onChange={(e) => setFileName(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                const parts = node.path.split("/");
+                                parts[parts.length - 1] = fileName;
+
+                                const newPath = parts.join("/");
+
+                                renameFile(node.path, newPath);
+                                setIsEditing(false);
+                            }
+
+                            if (e.key === "Escape") {
+                                setFileName(node.name);
+                                setIsEditing(false);
+                            }
+                        }}
+
+                        className="w-full rounded border border-gray-500 bg-transparent px-1 text-sm text-white outline-none"
+                    />
+                ) : (
+                    <span
+                        className={
+                            activeFile === node.path
+                                ? "text-white font-medium"
+                                : "text-gray-300"
+                        }
+                    >
+                        {node.name}
+                    </span>
+                )}
+
+
             </div>
 
             {open &&
@@ -141,6 +210,42 @@ ${activeFile === node.path
                         level={level + 1}
                     />
                 )}
+            {showMenu && (
+                <div
+                    ref={menuRef}
+                    className="fixed z-50 w-40 rounded-md border border-gray-700 bg-[#1E293B] py-1 shadow-xl"
+                    style={{
+                        left: menuPosition.x,
+                        top: menuPosition.y,
+                    }}
+                >
+                    <button
+                        onClick={() => {
+                            setShowMenu(false);
+                            setIsEditing(true);
+                        }}
+                        className="block w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700"
+                    >
+                        ✏️ Rename
+                    </button>
+
+                    <button
+                        className="block w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700"
+                    >
+                        📄 Duplicate
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            deleteFile(node.path);
+                            setShowMenu(false);
+                        }}
+                        className="block w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-gray-700"
+                    >
+                        🗑️ Delete
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
