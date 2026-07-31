@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import { useAIStore } from "@/store/aiStore";
 import FileTree from "./FileTree";
 import { ExplorerNode } from "@/types/project";
+import { autoSaveWorkspace } from "@/services/workspace";
+
 function buildFileTree(files: string[]): ExplorerNode[] {
     const root: ExplorerNode[] = [];
 
@@ -106,7 +108,7 @@ export default function FileExplorer() {
                         placeholder="components/Navbar.tsx"
                         value={newFileName}
                         onChange={(e) => setNewFileName(e.target.value)}
-                        onKeyDown={(e) => {
+                        onKeyDown={async (e) => {
                             if (e.key === "Enter") {
                                 console.log("Creating:", newFileName);
 
@@ -116,13 +118,14 @@ export default function FileExplorer() {
 
                                 createFile(newFileName.trim());
 
+                                await autoSaveWorkspace();
+
                                 console.log("After create");
 
                                 setNewFileName("");
                                 setShowNewFile(false);
                             }
-                        }
-                        }
+                        }}
                         className="w-full rounded border border-gray-600 bg-[#1f2937] px-3 py-2 text-sm text-white outline-none focus:border-purple-500"
                     />
                 </div>
@@ -137,7 +140,7 @@ export default function FileExplorer() {
                         onChange={(e) =>
                             setNewFolderName(e.target.value)
                         }
-                        onKeyDown={(e) => {
+                        onKeyDown={async (e) => {
                             if (e.key === "Enter") {
                                 if (!newFolderName.trim()) return;
 

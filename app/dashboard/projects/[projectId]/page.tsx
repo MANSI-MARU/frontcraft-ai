@@ -5,9 +5,19 @@ import { useParams } from "next/navigation";
 import { getProjectById } from "@/services/project";
 import WorkspaceHeader from "@/components/studio/WorkspaceHeader";
 import StudioLayout from "@/components/studio/StudioLayout";
+import { useAIStore } from "@/store/aiStore";
 
 export default function ProjectPage() {
     const params = useParams();
+    const {
+        setProjectId,
+        setGeneratedFiles,
+        setGeneratedCode,
+        setActiveFile,
+        setOpenTabs,
+        setHistory,
+        setDevice,
+    } = useAIStore();
 
     const [project, setProject] = useState<any>(null);
 
@@ -22,9 +32,32 @@ export default function ProjectPage() {
                     params.projectId as string
                 );
 
-                console.log(data);
-
                 setProject(data);
+                setProjectId(params.projectId as string);
+
+                // Restore workspace if it exists
+                if (data.generatedFiles) {
+                    setGeneratedFiles(data.generatedFiles);
+
+                    const activeFile =
+                        data.activeFile || "App.tsx";
+
+                    setActiveFile(activeFile);
+
+                    setGeneratedCode(
+                        data.generatedFiles[activeFile] ?? ""
+                    );
+
+                    setOpenTabs(
+                        data.openTabs ?? [activeFile]
+                    );
+
+                    setHistory(data.history ?? []);
+
+                    setDevice(
+                        data.device ?? "desktop"
+                    );
+                }
             } catch (error) {
                 console.error(error);
             } finally {

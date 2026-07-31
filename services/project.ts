@@ -6,10 +6,12 @@ import {
     where,
     getDocs,
     orderBy,
+    updateDoc,
+    doc,
+    getDoc,
 } from "firebase/firestore";
 
 import { db } from "./firebase";
-import { doc, getDoc } from "firebase/firestore";
 
 export const createProject = async (
     userId: string,
@@ -56,4 +58,25 @@ export const getProjectById = async (projectId: string) => {
         id: docSnap.id,
         ...docSnap.data(),
     };
+};
+export const saveProjectWorkspace = async (
+    projectId: string,
+    workspace: {
+        generatedFiles: Record<string, string>;
+        history: unknown[];
+        activeFile: string;
+        openTabs: string[];
+        device: string;
+    }
+) => {
+    const projectRef = doc(db, "projects", projectId);
+
+    await updateDoc(projectRef, {
+        generatedFiles: workspace.generatedFiles,
+        history: workspace.history,
+        activeFile: workspace.activeFile,
+        openTabs: workspace.openTabs,
+        device: workspace.device,
+        updatedAt: serverTimestamp(),
+    });
 };

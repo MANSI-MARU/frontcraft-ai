@@ -1,6 +1,7 @@
 "use client";
 
 import { useAIStore } from "@/store/aiStore";
+import { autoSaveWorkspace } from "@/services/workspace";
 
 export default function PromptPanel() {
     const {
@@ -15,6 +16,8 @@ export default function PromptPanel() {
         setActiveFile,
         setOpenTabs,
         addHistory,
+        projectId,
+        device,
     } = useAIStore();
 
     const handleGenerate = async () => {
@@ -62,7 +65,22 @@ export default function PromptPanel() {
                 prompt,
                 parsed.files
             );
+            console.log("Current Project ID:", projectId);
+            console.log("Current Project ID:", projectId);
 
+            if (!projectId) {
+                console.error("Project ID is null");
+            } else {
+                try {
+                    console.log("Saving workspace to Firestore...");
+
+                    await autoSaveWorkspace();
+
+                    console.log("✅ Workspace saved successfully");
+                } catch (error) {
+                    console.error("❌ Firestore Save Error:", error);
+                }
+            }
 
         } catch (err) {
             if (err instanceof Error) {

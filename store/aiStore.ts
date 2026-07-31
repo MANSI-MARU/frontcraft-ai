@@ -27,6 +27,7 @@ interface AIStore {
     device: "desktop" | "tablet" | "mobile";
     history: HistoryItem[];
     projectVersion: number;
+    projectId: string | null;
 
     setPrompt: (prompt: string) => void;
 
@@ -41,8 +42,10 @@ interface AIStore {
         device: "desktop" | "tablet" | "mobile"
     ) => void;
     addHistory: (title: string, files: GeneratedFiles) => void;
+    setHistory: (history: HistoryItem[]) => void;
     restoreHistory: (id: string) => void;
     incrementProjectVersion: () => void;
+    setProjectId: (projectId: string) => void;
 
     createFile: (path: string) => void;
     createFolder: (path: string) => void;
@@ -72,6 +75,7 @@ export const useAIStore = create<AIStore>((set) => ({
 
     history: [],
     projectVersion: 0,
+    projectId: null,
 
     setPrompt: (prompt) =>
         set({
@@ -116,6 +120,10 @@ export const useAIStore = create<AIStore>((set) => ({
     setDevice: (device) =>
         set({
             device,
+        }),
+    setHistory: (history) =>
+        set({
+            history,
         }),
     addHistory: (title, files) =>
         set((state) => ({
@@ -165,7 +173,10 @@ export const useAIStore = create<AIStore>((set) => ({
         set((state) => ({
             projectVersion: state.projectVersion + 1,
         })),
-
+    setProjectId: (projectId) =>
+        set({
+            projectId,
+        }),
 
     createFile: (path) =>
         set((state) => {

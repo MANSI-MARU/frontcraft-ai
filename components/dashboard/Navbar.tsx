@@ -2,6 +2,7 @@
 
 import { Bell, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { exportProject } from "@/lib/exportProject";
 
 export default function Navbar() {
     const { user } = useAuth();
@@ -38,6 +39,7 @@ export default function Navbar() {
                 <button className="rounded-lg bg-[#1E293B] p-2 hover:bg-[#334155]">
                     <Bell size={20} />
                 </button>
+                
 
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 font-semibold">

@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { useAIStore } from "@/store/aiStore";
 import { frontCraftRuntime } from "@/lib/runtime/runtime";
 import { toast } from "sonner";
 import EditorTabs from "./EditorTabs";
+import { autoSaveWorkspace } from "@/services/workspace";
 
 const isFileMap = (value: any): value is Record<string, string> => {
     return (
@@ -40,18 +41,33 @@ export default function BottomPanel() {
         "code" | "chat" | "console" | "history"
     >("code");
     const [chatMessage, setChatMessage] = useState("");
+    const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
     const handleEditorChange = (value: string | undefined) => {
         if (!value) return;
 
-        // Update single-file code (current compatibility)
         setGeneratedCode(value);
 
-        // Update selected file
-        setGeneratedFiles({
+        const updatedFiles = {
             ...generatedFiles,
             [activeFile]: value,
-        });
+        };
+
+        setGeneratedFiles(updatedFiles);
+
         setIsModified(true);
+
+        // Debounce auto save
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
+
+        const timeout = setTimeout(async () => {
+            await autoSaveWorkspace();
+
+            toast.success("Workspace auto-saved");
+        }, 1000);
+
+        setSaveTimeout(timeout);
     };
 
     const handleCopy = async () => {
@@ -149,8 +165,12 @@ export default function BottomPanel() {
 
             setIsModified(true);
 
+            addHistory(chatMessage, files);
+
+            // Save the updated workspace
+            await autoSaveWorkspace();
+
             toast.success("UI updated successfully!");
-            addHistory(chatMessage, data.files);
 
             setChatMessage("");
         } catch (error) {
@@ -366,11 +386,17 @@ export default function BottomPanel() {
                                             App.tsx Length: {item.files["App.tsx"]?.length}
                                         </p>
                                         <button
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 console.log("Button clicked:", item.id);
+
                                                 restoreHistory(item.id);
+
+                                                setTimeout(async () => {
+                                                    await autoSaveWorkspace();
+                                                    toast.success("Version restored successfully!");
+                                                }, 100);
                                             }}
-                                            className="mt-3 rounded-md bg-purple-600 px-3 py-2 text-sm text-white hover:bg-purple-700"
+                                            className="mt-4 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
                                         >
                                             Restore Version
                                         </button>
